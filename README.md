@@ -189,6 +189,70 @@
 
 ### 4. 히트  
 
+## 1️⃣ 물리 반응하는 박스 액터 만들기
 
+1. `BP_Bomb`이름을 가진 Blueprint Class를 생성한다.
+    
+<img width="1509" height="708" alt="Image" src="https://github.com/user-attachments/assets/3e370968-47b6-490d-93a4-a5f06b35d086" />
+    
+2. `BP_Bomb` 블루프린트로 들어가서 Components 창에서 ‘+ Add’ 버튼을 클릭하고 Static Mesh 컴포넌트를 검색해서 추가한다. 이름은 `StaticMesh`로 냅둔다.
+    
+<img width="1211" height="852" alt="Image" src="https://github.com/user-attachments/assets/d727f4e1-5ddd-4167-a630-6054cf250cb9" />
+    
+3. `StaticMesh` 컴포넌트를 선택하고 우측의 Details 창에서 Static Mesh 카테고리의 Static Mesh 속성을 `Cylinder`로 지정한다.
+    
+4. 물리 설정을 활성화하기 위해서, Details 창에서 Physics 카테고리를 찾아 Simulate Physics 속성을 체크한다. Mass에 체크하고 1000.0으로 설정하고, Linear Damping과 Angular Damping도 0.5로 값을 각각 설정했다.
+
+<img width="1542" height="928" alt="Image" src="https://github.com/user-attachments/assets/b06d02e7-ca91-44a9-bee9-cc1aade00568" />
+    
+5. Details 창에서 스크롤을 더 내려서 Collision 카테고리에서 Collision Presets가 PhysicsActor로 설정되어 있는지 확인을 한다.
+
+<img width="1497" height="1033" alt="Image" src="https://github.com/user-attachments/assets/30dd6d0e-462e-4ac1-9e75-cb90131753f3" />
+    
+6. `BP_Bomb` 블루프린트를 컴파일하고 저장을 한다. 이후 에디터 뷰포트에서 `BP_Bomb`를 드래그하여 레벨에 배치하고, 물리적인 반응을 하는지 테스트를 해본다.
+
+<img width="1272" height="954" alt="Image" src="https://github.com/user-attachments/assets/ecc9673f-5ed5-4e4b-9538-9a8f16812c5e" />
+
+<img width="1575" height="1068" alt="Image" src="https://github.com/user-attachments/assets/4da6f411-8a77-483c-a02d-4e1581257dfb" />
+
+
+## 2️⃣ 충돌 이벤트 감지에 따른 반응 추가하기
+
+1. `BP_Bomb` 블루프린트로 다시 돌아가 Components 창에서 StaticMesh 컴포넌트를 선택한다.
+
+    Details 창에서 맨 아래로 내려서 Events 카테고리를에서 On Component Hit를 찾고 옆에 + 버튼을 눌러 Event Graph에 이벤트 노드를 추가한다.
+
+<img width="2468" height="902" alt="Image" src="https://github.com/user-attachments/assets/72c51e53-1c20-4566-a28e-dd96917e2b76" />
+    
+2. Event Graph 창으로 넘어가면서 아래와 같은 노드가 생성된 것을 볼 수 있다.
+
+<img width="2559" height="703" alt="Image" src="https://github.com/user-attachments/assets/4fcf1d7f-b4b1-43b1-902e-af9b60d63773" />
+    
+3. 실린더에 닿으면 플레이어가 튀어오르게 하기 위해 다음의 노드를 사용하여 블루프린트 로직을 작성한다.
+
+    <img width="1864" height="998" alt="Image" src="https://github.com/user-attachments/assets/b3893b0b-bdf9-44e2-a268-577d007ce4af" />
+    
+    - OnComponentHit (StaticMesh)
+        - Static Mesh에 물리적 충돌이 감지될 때 실행되는 이벤트이다.
+        - 메시에 표면에 다른 뭔가가 부딪히면 호출이 된다.
+        - 충돌 대상에 대한 정보(Other Actor 등)가 이벤트로 흘러 들어오게 된다.
+    - Cast To BP_Character
+        - 충돌한 대상이 우리 게임에서 쓰는 플레이어 캐릭터인지 확인한다.
+        - 다른 오브젝트랑 충돌하면 무시한다.
+        - 충돌한 Actor를 BP Character로 Cast 성공한다면, 충돌 주체가 캐릭터임을 확인 할 수 있다.
+    - Launch Character
+        - Launch = 플레이어를 어느 방향으로 발사 하는 힘이다.
+        - `Z = 10000`이면 위로 팍 튀어오르게 된다.
+        - `Target = As BP Character`로 설정하여 Hit가 발생했을때 닿은 상대가 플레이어면 작용하게 합니다.
+    - 만약 플레이어가 아니라면 Add Impulse 사용한다
+        - Impulse = 아무 액터나 순간적으로 튀게 하는 힘을 줄 수 있다.
+        - `Target = StaticMesh`로 해서 블루프린트가 소유한 메쉬 자체에 힘을 주게 한다.
+          
+6. `BP_PhysicsBox` 블루프린트를 컴파일하고 저장한 후, 뷰포트에서 게임 플레이를 실행하고 테스트해봅시다. 박스와 캐릭터가 부딪히면 멀리 날아가버리는 효과를 볼 수 있습니다.
+
+
+<img width="1663" height="888" alt="Image" src="https://github.com/user-attachments/assets/88066e8b-0c92-4f11-a960-ac6b678e8bff" />
+
+<img width="1903" height="909" alt="Image" src="https://github.com/user-attachments/assets/1a6fd74b-52d8-4c45-9ba8-597e02602e20" />
 
 #내일배움캠프 #사전캠프 #TIL 
